@@ -1,17 +1,16 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers } from "../store/slices/usersSlice.js";
+import { useAppActions, useAppState } from "../state/AppState.jsx";
 import { LoadingState } from "../components/LoadingState.jsx";
 import { ErrorCallout } from "../components/ErrorCallout.jsx";
 import { Badge } from "../components/Badge.jsx";
 
 export default function RespondersPage() {
-  const dispatch = useDispatch();
-  const users = useSelector((s) => s.users);
+  const actions = useAppActions();
+  const users = useAppState().users;
 
   React.useEffect(() => {
-    dispatch(fetchUsers());
-  }, [dispatch]);
+    actions.loadUsers();
+  }, [actions]);
 
   return (
     <div className="space-y-4">
@@ -22,7 +21,7 @@ export default function RespondersPage() {
 
       {users.status === "loading" ? <LoadingState /> : null}
       {users.error ? (
-        <ErrorCallout title="Users failed" message={users.error} onRetry={() => dispatch(fetchUsers())} />
+        <ErrorCallout title="Users failed" message={users.error} onRetry={() => actions.loadUsers()} />
       ) : null}
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">

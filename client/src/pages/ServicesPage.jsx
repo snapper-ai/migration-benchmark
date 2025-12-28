@@ -1,9 +1,6 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { createService, deleteService, fetchServices, updateService } from "../store/slices/servicesSlice.js";
-import { fetchUsers } from "../store/slices/usersSlice.js";
-import { DataTable } from "../components/DataTable.jsx";
+import { useAppActions, useAppState } from "../state/AppState.jsx";
 import { LoadingState } from "../components/LoadingState.jsx";
 import { ErrorCallout } from "../components/ErrorCallout.jsx";
 import { Modal } from "../components/Modal.jsx";
@@ -13,8 +10,8 @@ import { useCurrentUser } from "../hooks/useCurrentUser.js";
 import { canManageServices } from "../utils/roles.js";
 
 export default function ServicesPage() {
-  const dispatch = useDispatch();
-  const services = useSelector((s) => s.services);
+  const actions = useAppActions();
+  const services = useAppState().services;
   const currentUser = useCurrentUser();
   const canEdit = canManageServices(currentUser?.role);
 
@@ -28,9 +25,9 @@ export default function ServicesPage() {
   const [formError, setFormError] = React.useState(null);
 
   React.useEffect(() => {
-    dispatch(fetchServices());
-    dispatch(fetchUsers());
-  }, [dispatch]);
+    actions.loadServices();
+    actions.loadUsers();
+  }, [actions]);
 
   function submitCreate() {
     const parsed = createServiceSchema.safeParse({
@@ -42,60 +39,14 @@ export default function ServicesPage() {
       return;
     }
     setFormError(null);
-    dispatch(createService(parsed.data))
-      .unwrap()
+    actions
+      .createService(parsed.data)
       .then(() => {
         setCreateOpen(false);
         setForm({ name: "", tier: 1, ownerTeam: "", status: "active" });
       })
       .catch((e) => setFormError(e.message || "Failed to create service"));
   }
-
-  const columns = [
-    {
-      key: "name",
-      header: "Service",
-      render: (s) => (
-        <div className="space-y-1">
-          <Link className="font-semibold text-indigo-200 hover:underline" to={`/services/${s.id}`}>
-            {s.name}
-          </Link>
-          <div className="text-xs text-slate-400">{s.ownerTeam}</div>
-        </div>
-      ),
-    },
-    { key: "tier", header: "Tier" },
-    {
-      key: "status",
-      header: "Status",
-      render: (s) => <Badge tone={s.status === "active" ? "green" : "amber"}>{s.status}</Badge>,
-    },
-    {
-      key: "actions",
-      header: "",
-      render: (s) =>
-        canEdit ? (
-          <div className="flex items-center justify-end gap-2">
-            <button
-              type="button"
-              className="rounded bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-100 hover:bg-slate-700"
-              onClick={() => dispatch(updateService({ id: s.id, patch: { status: s.status === "active" ? "degraded" : "active" } }))}
-            >
-              Toggle
-            </button>
-            <button
-              type="button"
-              className="rounded bg-rose-800 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-700"
-              onClick={() => dispatch(deleteService(s.id))}
-            >
-              Delete
-            </button>
-          </div>
-        ) : (
-          <div className="text-right text-xs text-slate-500">read-only</div>
-        ),
-    },
-  ];
 
   return (
     <div className="space-y-4">
@@ -116,10 +67,58 @@ export default function ServicesPage() {
 
       {services.status === "loading" ? <LoadingState /> : null}
       {services.error ? (
-        <ErrorCallout title="Services failed" message={services.error} onRetry={() => dispatch(fetchServices())} />
+        <ErrorCallout title="Services failed" message={services.error} onRetry={() => actions.loadServices()} />
       ) : null}
 
-      <DataTable columns={columns} rows={services.items} rowKey={(s) => s.id} emptyLabel="No services" />
+      <div className="space-y-2">
+        {services.items.map((s) => (
+          <div
+            key={s.id}
+            className="flex items-start justify-between gap-3 rounded border border-slate-800 bg-slate-950 px-3 py-2"
+          >
+            <div className="space-y-1">
+              <Link className="font-semibold text-indigo-200 hover:underline" to={`/services/${s.id}`}>
+                {s.name}
+              </Link>
+              <div className="text-xs text-slate-400">
+                Tier {s.tier} · {s.ownerTeam}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge tone={s.status === "active" ? "green" : "amber"}>{s.status}</Badge>
+              {canEdit ? (
+                <>
+                  <button
+                    type="button"
+                    className="rounded bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-100 hover:bg-slate-700"
+                    onClick={() =>
+                      actions.patchService(s.id, {
+                        status: s.status === "active" ? "degraded" : "active",
+                      })
+                    }
+                  >
+                    Toggle
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded bg-rose-800 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-700"
+                    onClick={() => actions.deleteService(s.id)}
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : (
+                <div className="text-right text-xs text-slate-500">read-only</div>
+              )}
+            </div>
+          </div>
+        ))}
+        {services.items.length === 0 ? (
+          <div className="rounded border border-slate-800 bg-slate-950 px-3 py-6 text-center text-sm text-slate-400">
+            No services
+          </div>
+        ) : null}
+      </div>
 
       <Modal
         title="Create service"

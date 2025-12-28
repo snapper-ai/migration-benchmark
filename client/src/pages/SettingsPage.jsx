@@ -1,18 +1,17 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers } from "../store/slices/usersSlice.js";
+import { useAppActions, useAppState } from "../state/AppState.jsx";
 import { config } from "../config.js";
 import { getCurrentUserId, setCurrentUserId } from "../utils/currentUser.js";
 import { Badge } from "../components/Badge.jsx";
 
 export default function SettingsPage() {
-  const dispatch = useDispatch();
-  const users = useSelector((s) => s.users.items);
+  const actions = useAppActions();
+  const users = useAppState().users.items;
   const [selected, setSelected] = React.useState(getCurrentUserId() || "");
 
   React.useEffect(() => {
-    dispatch(fetchUsers());
-  }, [dispatch]);
+    actions.loadUsers();
+  }, [actions]);
 
   const current = users.find((u) => u.id === selected) || null;
 

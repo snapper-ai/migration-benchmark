@@ -21,11 +21,11 @@ It is intentionally structured to be **migration-stressful** while remaining rea
     - Client dev server listens on `process.env.VITE_PORT` (fallback `5173`)
 
 - **Seed data counts (deterministic, stable IDs)**
-  - Services: **8**
-  - Incidents: **50**
-  - Users: **6**
-  - Activity entries: **20**
-  - Comments: **30**
+  - Services: **3** (Lite Template v2)
+  - Incidents: **10** (Lite Template v2)
+  - Users: **3** (Lite Template v2)
+  - Activity entries: **5** (Lite Template v2)
+  - Comments: **5** (Lite Template v2)
 
 - **Root scripts (run from repo root)**
   - **`npm run dev`**: starts server (3001) + client (5173) concurrently and prints both URLs
@@ -62,6 +62,10 @@ See `contracts/`:
 ## Lite Template v1
 
 This repo also has a **Lite Template v1** baseline tag intended to reduce migration turn/cost while keeping core signals. See `LITE_TEMPLATE_V1.md`.
+
+## Lite Template v2
+
+This branch/tag is **Lite Template v2**. See `LITE_TEMPLATE_V2.md`.
 
 ### Running multiple instances (example)
 

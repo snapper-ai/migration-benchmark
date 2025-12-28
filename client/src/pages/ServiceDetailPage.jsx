@@ -1,22 +1,20 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { fetchServices } from "../store/slices/servicesSlice.js";
-import { fetchIncidents } from "../store/slices/incidentsSlice.js";
+import { useAppActions, useAppState } from "../state/AppState.jsx";
 import { LoadingState } from "../components/LoadingState.jsx";
 import { Badge } from "../components/Badge.jsx";
 import { computeSla } from "../utils/sla.js";
 
 export default function ServiceDetailPage() {
   const { id } = useParams();
-  const dispatch = useDispatch();
-  const services = useSelector((s) => s.services.items);
-  const incidents = useSelector((s) => s.incidents.items);
+  const actions = useAppActions();
+  const services = useAppState().services.items;
+  const incidents = useAppState().incidents.items;
 
   React.useEffect(() => {
-    dispatch(fetchServices());
-    dispatch(fetchIncidents({ serviceId: id, sort: "createdAt_desc" }));
-  }, [dispatch, id]);
+    actions.loadServices();
+    actions.loadIncidents({ serviceId: id, sort: "createdAt_desc" });
+  }, [actions, id]);
 
   const service = services.find((s) => s.id === id);
   if (!service) return <LoadingState label="Loading service…" />;

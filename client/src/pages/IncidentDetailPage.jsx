@@ -1,10 +1,6 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { fetchIncidentById, reopenIncident, updateIncident } from "../store/slices/incidentsSlice.js";
-import { fetchCommentsForIncident, createComment } from "../store/slices/commentsSlice.js";
-import { fetchUsers } from "../store/slices/usersSlice.js";
-import { fetchServices } from "../store/slices/servicesSlice.js";
+import { useAppActions, useAppState } from "../state/AppState.jsx";
 import { LoadingState } from "../components/LoadingState.jsx";
 import { ErrorCallout } from "../components/ErrorCallout.jsx";
 import { Badge } from "../components/Badge.jsx";
@@ -16,28 +12,30 @@ import { canManageComments, canManageIncidents } from "../utils/roles.js";
 
 export default function IncidentDetailPage() {
   const { id } = useParams();
-  const dispatch = useDispatch();
+  const actions = useAppActions();
+  const state = useAppState();
 
   const currentUser = useCurrentUser();
   const canEditIncident = canManageIncidents(currentUser?.role);
   const canComment = canManageComments(currentUser?.role);
 
-  const incident = useSelector((s) => s.incidents.byId[id]);
-  const incidentsError = useSelector((s) => s.incidents.error);
-  const comments = useSelector((s) => s.comments.byIncidentId[id] || []);
-  const commentsError = useSelector((s) => s.comments.error);
-  const users = useSelector((s) => s.users.items);
-  const services = useSelector((s) => s.services.items);
+  const incident = state.incidents.items.find((i) => i.id === id);
+  const incidentsError = state.incidents.error;
+  const comments = state.comments.byIncidentId[id] || [];
+  const commentsError = state.comments.error;
+  const users = state.users.items;
+  const services = state.services.items;
 
   const [commentBody, setCommentBody] = React.useState("");
   const [actionError, setActionError] = React.useState(null);
 
   React.useEffect(() => {
-    dispatch(fetchUsers());
-    dispatch(fetchServices());
-    dispatch(fetchIncidentById(id));
-    dispatch(fetchCommentsForIncident(id));
-  }, [dispatch, id]);
+    actions.loadUsers();
+    actions.loadServices();
+    actions.loadIncidents({ ...state.incidents.query, q: "", serviceId: "" });
+    actions.loadComments(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actions, id]);
 
   if (!incident) return <LoadingState label="Loading incident…" />;
 
@@ -47,23 +45,23 @@ export default function IncidentDetailPage() {
 
   function doUpdateStatus(status) {
     setActionError(null);
-    dispatch(updateIncident({ id: incident.id, patch: { status } }))
-      .unwrap()
+    actions
+      .patchIncident(incident.id, { status })
       .catch((e) => setActionError(e.message || "Failed to update status"));
   }
 
   function doReopen() {
     setActionError(null);
-    dispatch(reopenIncident(incident.id))
-      .unwrap()
+    actions
+      .reopenIncident(incident.id)
       .catch((e) => setActionError(e.message || "Failed to reopen"));
   }
 
   function doAddComment() {
     if (!commentBody.trim()) return;
     setActionError(null);
-    dispatch(createComment({ incidentId: incident.id, body: commentBody.trim() }))
-      .unwrap()
+    actions
+      .addComment(incident.id, commentBody.trim())
       .then(() => setCommentBody(""))
       .catch((e) => setActionError(e.message || "Failed to add comment"));
   }

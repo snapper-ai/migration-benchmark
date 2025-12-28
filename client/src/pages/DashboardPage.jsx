@@ -1,8 +1,5 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchServices } from "../store/slices/servicesSlice.js";
-import { fetchIncidents } from "../store/slices/incidentsSlice.js";
-import { fetchActivity } from "../store/slices/activitySlice.js";
+import { useAppActions, useAppState } from "../state/AppState.jsx";
 import { LoadingState } from "../components/LoadingState.jsx";
 import { ErrorCallout } from "../components/ErrorCallout.jsx";
 import { Badge } from "../components/Badge.jsx";
@@ -10,21 +7,20 @@ import { computeSla } from "../utils/sla.js";
 import { formatDateTime } from "../utils/dates.js";
 
 export default function DashboardPage() {
-  const dispatch = useDispatch();
-  const services = useSelector((s) => s.services);
-  const incidents = useSelector((s) => s.incidents);
-  const activity = useSelector((s) => s.activity);
+  const actions = useAppActions();
+  const { services, incidents, activity } = useAppState();
 
   React.useEffect(() => {
-    dispatch(fetchServices());
-    dispatch(fetchIncidents({ sort: "createdAt_desc" }));
-    dispatch(fetchActivity());
-  }, [dispatch]);
+    actions.loadServices();
+    actions.loadIncidents({ ...incidents.query, sort: "createdAt_desc" });
+    actions.loadActivity();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
-    const t = setInterval(() => dispatch(fetchActivity()), 5000);
+    const t = setInterval(() => actions.loadActivity(), 5000);
     return () => clearInterval(t);
-  }, [dispatch]);
+  }, [actions]);
 
   const breachedCount = incidents.items.filter((i) => computeSla(i).breached).length;
   const openCount = incidents.items.filter((i) => i.status !== "resolved").length;
@@ -49,10 +45,14 @@ export default function DashboardPage() {
       ) : null}
 
       {services.error ? (
-        <ErrorCallout title="Services failed" message={services.error} onRetry={() => dispatch(fetchServices())} />
+        <ErrorCallout title="Services failed" message={services.error} onRetry={() => actions.loadServices()} />
       ) : null}
       {incidents.error ? (
-        <ErrorCallout title="Incidents failed" message={incidents.error} onRetry={() => dispatch(fetchIncidents(incidents.query))} />
+        <ErrorCallout
+          title="Incidents failed"
+          message={incidents.error}
+          onRetry={() => actions.loadIncidents(incidents.query)}
+        />
       ) : null}
 
       <div className="rounded border border-slate-800 bg-slate-950 p-4">
@@ -71,14 +71,14 @@ export default function DashboardPage() {
             <button
               type="button"
               className="rounded bg-rose-800 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-700"
-              onClick={() => dispatch(fetchActivity({ forceError: true }))}
+              onClick={() => actions.loadActivity({ forceError: true })}
             >
               Force error
             </button>
             <button
               type="button"
               className="rounded bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-100 hover:bg-slate-700"
-              onClick={() => dispatch(fetchActivity())}
+              onClick={() => actions.loadActivity()}
             >
               Refresh
             </button>
@@ -91,7 +91,11 @@ export default function DashboardPage() {
 
         {activity.error ? (
           <div className="mt-3">
-            <ErrorCallout title="Activity failed" message={activity.error} onRetry={() => dispatch(fetchActivity())} />
+            <ErrorCallout
+              title="Activity failed"
+              message={activity.error}
+              onRetry={() => actions.loadActivity()}
+            />
           </div>
         ) : null}
 

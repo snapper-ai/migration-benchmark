@@ -98,6 +98,14 @@ Response (200) — example items:
     "ownerTeam": "Payments",
     "status": "degraded",
     "createdAt": "2024-12-12T11:20:00.000Z"
+  },
+  {
+    "id": "svc_003",
+    "name": "Search Indexer",
+    "tier": 2,
+    "ownerTeam": "Core",
+    "status": "active",
+    "createdAt": "2024-12-13T04:00:00.000Z"
   }
 ]
 ```
@@ -441,19 +449,19 @@ Response (200) — example items:
 ```json
 [
   {
-    "id": "act_020",
-    "type": "update",
+    "id": "act_005",
+    "type": "create",
     "entityType": "incident",
-    "entityId": "inc_020",
-    "message": "Seed activity 20 for incident inc_020.",
+    "entityId": "inc_005",
+    "message": "Seed activity 5 for incident inc_005.",
     "createdAt": "2025-01-10T22:20:00.000Z"
   },
   {
-    "id": "act_019",
-    "type": "create",
+    "id": "act_004",
+    "type": "update",
     "entityType": "service",
     "entityId": "svc_003",
-    "message": "Seed activity 19 for service svc_003.",
+    "message": "Seed activity 4 for service svc_003.",
     "createdAt": "2025-01-10T22:25:00.000Z"
   }
 ]
