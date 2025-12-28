@@ -53,6 +53,12 @@ npm run dev
 
 Client env example: `client/.env.example` (Vite reads via `import.meta.env`).
 
+## API schema reference (authoritative)
+
+See `contracts/`:
+- `contracts/openapi.yaml`: OpenAPI 3 spec for `/api/*` routes (request/response shapes and enums)
+- `contracts/examples.md`: JSON examples for key endpoints
+
 ### Running multiple instances (example)
 
 ```bash
