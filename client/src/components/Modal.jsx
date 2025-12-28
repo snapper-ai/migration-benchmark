@@ -1,16 +1,28 @@
 import React from "react";
-import { Dialog } from "@headlessui/react";
 
 export function Modal({ title, open, onClose, children, footer }) {
+  React.useEffect(() => {
+    function onKeyDown(e) {
+      if (e.key === "Escape") onClose?.();
+    }
+    if (open) window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onClose={onClose} className="relative z-20">
-      <div className="fixed inset-0 bg-black/60" aria-hidden="true" />
+    <div className="relative z-20" role="dialog" aria-modal="true">
+      <button
+        type="button"
+        className="fixed inset-0 cursor-default bg-black/60"
+        aria-label="Close modal"
+        onClick={() => onClose?.()}
+      />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="w-full max-w-lg rounded border border-slate-800 bg-slate-950 shadow-xl">
+        <div className="w-full max-w-lg rounded border border-slate-800 bg-slate-950 shadow-xl">
           <div className="border-b border-slate-800 px-4 py-3">
-            <Dialog.Title className="text-sm font-semibold text-slate-100">
-              {title}
-            </Dialog.Title>
+            <div className="text-sm font-semibold text-slate-100">{title}</div>
           </div>
           <div className="px-4 py-3">{children}</div>
           {footer ? (
@@ -18,9 +30,9 @@ export function Modal({ title, open, onClose, children, footer }) {
               {footer}
             </div>
           ) : null}
-        </Dialog.Panel>
+        </div>
       </div>
-    </Dialog>
+    </div>
   );
 }
 

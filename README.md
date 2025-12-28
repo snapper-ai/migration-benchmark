@@ -59,6 +59,10 @@ See `contracts/`:
 - `contracts/openapi.yaml`: OpenAPI 3 spec for `/api/*` routes (request/response shapes and enums)
 - `contracts/examples.md`: JSON examples for key endpoints
 
+## Lite Template v1
+
+This repo also has a **Lite Template v1** baseline tag intended to reduce migration turn/cost while keeping core signals. See `LITE_TEMPLATE_V1.md`.
+
 ### Running multiple instances (example)
 
 ```bash

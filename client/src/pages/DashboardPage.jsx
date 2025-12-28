@@ -1,6 +1,5 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { fetchServices } from "../store/slices/servicesSlice.js";
 import { fetchIncidents } from "../store/slices/incidentsSlice.js";
 import { fetchActivity } from "../store/slices/activitySlice.js";
@@ -30,11 +29,6 @@ export default function DashboardPage() {
   const breachedCount = incidents.items.filter((i) => computeSla(i).breached).length;
   const openCount = incidents.items.filter((i) => i.status !== "resolved").length;
 
-  const sevCounts = ["S1", "S2", "S3", "S4"].map((sev) => ({
-    severity: sev,
-    count: incidents.items.filter((i) => i.severity === sev).length,
-  }));
-
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -61,28 +55,12 @@ export default function DashboardPage() {
         <ErrorCallout title="Incidents failed" message={incidents.error} onRetry={() => dispatch(fetchIncidents(incidents.query))} />
       ) : null}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded border border-slate-800 bg-slate-950 p-4 md:col-span-2">
-          <div className="text-sm font-semibold text-slate-200">Incidents by severity</div>
-          <div className="mt-3 h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={sevCounts}>
-                <XAxis dataKey="severity" stroke="#94a3b8" />
-                <YAxis allowDecimals={false} stroke="#94a3b8" />
-                <Tooltip />
-                <Bar dataKey="count" fill="#6366f1" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="rounded border border-slate-800 bg-slate-950 p-4">
-          <div className="text-sm font-semibold text-slate-200">Seed sanity</div>
-          <div className="mt-3 space-y-2 text-sm text-slate-300">
-            <div>Services: {services.items.length}</div>
-            <div>Incidents: {incidents.items.length}</div>
-            <div>Activity: {activity.items.length}</div>
-          </div>
+      <div className="rounded border border-slate-800 bg-slate-950 p-4">
+        <div className="text-sm font-semibold text-slate-200">Seed sanity</div>
+        <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-300 md:grid-cols-3">
+          <div>Services: {services.items.length}</div>
+          <div>Incidents: {incidents.items.length}</div>
+          <div>Activity: {activity.items.length}</div>
         </div>
       </div>
 
