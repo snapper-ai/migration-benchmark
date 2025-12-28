@@ -13,8 +13,12 @@ It is intentionally structured to be **migration-stressful** while remaining rea
 ## Benchmark invariants
 
 - **Ports**
-  - Server: `http://localhost:3001` (API base: `http://localhost:3001/api`)
-  - Client: `http://localhost:5173`
+  - Defaults:
+    - Server: `http://localhost:3001` (API base: `http://localhost:3001/api`)
+    - Client: `http://localhost:5173`
+  - Overrides (operator-controlled; defaults unchanged):
+    - Server listens on `process.env.PORT` (fallback `3001`)
+    - Client dev server listens on `process.env.VITE_PORT` (fallback `5173`)
 
 - **Seed data counts (deterministic, stable IDs)**
   - Services: **8**
@@ -48,6 +52,12 @@ npm run dev
 ```
 
 Client env example: `client/.env.example` (Vite reads via `import.meta.env`).
+
+### Running multiple instances (example)
+
+```bash
+PORT=3002 VITE_PORT=5174 VITE_API_BASE_URL=http://localhost:3002/api npm run dev
+```
 
 ## Deterministic failure path
 

@@ -7,7 +7,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "dev": "node -e \"console.log('Backend API: http://localhost:3001'); console.log('Frontend Dev: http://localhost:5173')\" && node ./node_modules/concurrently/dist/bin/concurrently.js -k -n server,client -c blue,green \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "dev": "node ./scripts/print-dev-urls.js && node ./node_modules/concurrently/dist/bin/concurrently.js -k -n server,client -c blue,green \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
     "build": "npm --prefix client run build",
     "test": "npm --prefix server run test && npm --prefix client run test",
     "lint": "npm --prefix server run lint && npm --prefix client run lint",

@@ -17,6 +17,7 @@ export default [
         window: "readonly",
         document: "readonly",
         console: "readonly",
+        process: "readonly",
         fetch: "readonly",
         URL: "readonly",
         setTimeout: "readonly",
