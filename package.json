@@ -1,0 +1,23 @@
+{
+  "name": "ops-command-center-source",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SnapperAI Migration Benchmark — Ops Command Center (React + JavaScript SOURCE)",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "node -e \"console.log('Backend API: http://localhost:3001'); console.log('Frontend Dev: http://localhost:5173')\" && node ./node_modules/concurrently/dist/bin/concurrently.js -k -n server,client -c blue,green \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix client run build",
+    "test": "npm --prefix server run test && npm --prefix client run test",
+    "lint": "npm --prefix server run lint && npm --prefix client run lint",
+    "verify": "npm run lint && npm run test && npm run build",
+    "install:all": "npm ci --prefix server && npm ci --prefix client",
+    "postinstall": "npm run install:all"
+  },
+  "devDependencies": {
+    "concurrently": "9.0.1"
+  }
+}
+
+

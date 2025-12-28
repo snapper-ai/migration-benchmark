@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* slightly opinionated defaults to create migration-stressful styling edges */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+
