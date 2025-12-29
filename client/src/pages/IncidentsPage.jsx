@@ -8,6 +8,7 @@ import { computeSla } from "../utils/sla.js";
 import { allowedTransitions } from "../utils/statusTransitions.js";
 import { useCurrentUser } from "../hooks/useCurrentUser.js";
 import { canManageIncidents } from "../utils/roles.js";
+import { INCIDENT_SEVERITIES, INCIDENT_STATUSES, isIncidentSeverity } from "../domain/enums.js";
 
 export default function IncidentsPage() {
   const actions = useAppActions();
@@ -44,7 +45,7 @@ export default function IncidentsPage() {
     const fields = {};
     if (!form.title || String(form.title).trim().length < 4) fields.title = "Title must be at least 4 characters";
     if (!form.description || String(form.description).trim().length < 1) fields.description = "Description is required";
-    if (!["S1", "S2", "S3", "S4"].includes(form.severity)) fields.severity = "Severity must be S1..S4";
+    if (!isIncidentSeverity(form.severity)) fields.severity = "Severity must be S1..S4";
     if (Object.keys(fields).length) {
       const first = Object.values(fields)[0];
       setFormError(String(first));
@@ -106,7 +107,7 @@ export default function IncidentsPage() {
             onChange={(e) => actions.setIncidentQuery({ status: e.target.value })}
           >
             <option value="">All</option>
-            {["triggered", "acknowledged", "investigating", "mitigated", "resolved"].map((s) => (
+            {INCIDENT_STATUSES.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -121,7 +122,7 @@ export default function IncidentsPage() {
             onChange={(e) => actions.setIncidentQuery({ severity: e.target.value })}
           >
             <option value="">All</option>
-            {["S1", "S2", "S3", "S4"].map((s) => (
+            {INCIDENT_SEVERITIES.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -268,7 +269,7 @@ export default function IncidentsPage() {
                 value={form.severity}
                 onChange={(e) => setForm((f) => ({ ...f, severity: e.target.value }))}
               >
-                {["S1", "S2", "S3", "S4"].map((s) => (
+                {INCIDENT_SEVERITIES.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>

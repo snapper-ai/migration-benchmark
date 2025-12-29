@@ -60,9 +60,6 @@ export default function IncidentDetailPage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-xl font-semibold text-slate-100">{incident.title}</div>
-            <div className="mt-1 text-sm text-slate-400">
-              Service: {incident.serviceId}
-            </div>
           </div>
           <div className="flex items-center gap-2">
             <Badge tone="slate">{incident.severity}</Badge>
