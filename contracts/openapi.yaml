@@ -1,29 +1,20 @@
 openapi: 3.0.3
 info:
-  title: Ops Command Center API
-  version: "1.0.0"
+  title: Migration Bench — Min v0 API
+  version: "0.0.0"
   description: |
-    Authoritative schema reference for the SnapperAI Migration Benchmark (SOURCE repo).
+    Minimal API surface for migration benchmarking.
 
-    Notes:
+    Invariants:
     - All `/api/*` routes (except `/api/health`) require `x-ops-user-id`.
     - 400/403 responses use the `VALIDATION_ERROR` envelope.
-    - 404 responses are `{ "message": "Not found" }` (not wrapped).
-    - `GET /api/activity?forceError=true` returns HTTP 500 with an `INTERNAL_ERROR` envelope (not `VALIDATION_ERROR`).
+    - 404 responses are `{ "message": "Not found" }`.
+    - `GET /api/activity?forceError=true` returns HTTP 500 with an `INTERNAL_ERROR` envelope.
 servers:
   - url: http://localhost:3001
-    description: Default dev server
-tags:
-  - name: Health
-  - name: Services
-  - name: Incidents
-  - name: Comments
-  - name: Users
-  - name: Activity
 paths:
   /api/health:
     get:
-      tags: [Health]
       summary: Health check
       responses:
         "200":
@@ -34,117 +25,30 @@ paths:
                 type: object
                 additionalProperties: false
                 properties:
-                  ok:
-                    type: boolean
+                  ok: { type: boolean }
                 required: [ok]
 
-  /api/services:
+  /api/users:
     get:
-      tags: [Services]
-      summary: List services
+      summary: List users
       parameters:
         - $ref: "#/components/parameters/XOpsUserId"
       responses:
         "200":
-          description: Service list
+          description: User list
           content:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: "#/components/schemas/Service"
+                items: { $ref: "#/components/schemas/User" }
         "403":
           $ref: "#/components/responses/ValidationError403"
-    post:
-      tags: [Services]
-      summary: Create service (admin only)
-      parameters:
-        - $ref: "#/components/parameters/XOpsUserId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ServiceCreate"
-      responses:
-        "201":
-          description: Created service
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Service"
-        "400":
-          $ref: "#/components/responses/ValidationError400"
-        "403":
-          $ref: "#/components/responses/ValidationError403"
-
-  /api/services/{id}:
-    get:
-      tags: [Services]
-      summary: Get service by id
-      parameters:
-        - $ref: "#/components/parameters/XOpsUserId"
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200":
-          description: Service
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Service"
-        "403":
-          $ref: "#/components/responses/ValidationError403"
-        "404":
-          $ref: "#/components/responses/NotFound"
-    patch:
-      tags: [Services]
-      summary: Patch service (admin only)
-      parameters:
-        - $ref: "#/components/parameters/XOpsUserId"
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ServicePatch"
-      responses:
-        "200":
-          description: Updated service
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Service"
-        "400":
-          $ref: "#/components/responses/ValidationError400"
-        "403":
-          $ref: "#/components/responses/ValidationError403"
-        "404":
-          $ref: "#/components/responses/NotFound"
-    delete:
-      tags: [Services]
-      summary: Delete service (admin only)
-      parameters:
-        - $ref: "#/components/parameters/XOpsUserId"
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "204":
-          description: Deleted
-        "403":
-          $ref: "#/components/responses/ValidationError403"
-        "404":
-          $ref: "#/components/responses/NotFound"
 
   /api/incidents:
     get:
-      tags: [Incidents]
-      summary: List incidents (supports filters/sort)
+      summary: List incidents
       parameters:
         - $ref: "#/components/parameters/XOpsUserId"
-        - name: serviceId
-          in: query
-          required: false
-          schema: { type: string }
         - name: status
           in: query
           required: false
@@ -161,7 +65,8 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/IncidentSort"
+            type: string
+            enum: [createdAt_desc, createdAt_asc, severity_asc, severity_desc]
         - name: breached
           in: query
           required: false
@@ -176,12 +81,10 @@ paths:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: "#/components/schemas/Incident"
+                items: { $ref: "#/components/schemas/Incident" }
         "403":
           $ref: "#/components/responses/ValidationError403"
     post:
-      tags: [Incidents]
       summary: Create incident (responder/admin)
       parameters:
         - $ref: "#/components/parameters/XOpsUserId"
@@ -189,15 +92,13 @@ paths:
         required: true
         content:
           application/json:
-            schema:
-              $ref: "#/components/schemas/IncidentCreate"
+            schema: { $ref: "#/components/schemas/IncidentCreate" }
       responses:
         "201":
           description: Created incident
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Incident"
+              schema: { $ref: "#/components/schemas/Incident" }
         "400":
           $ref: "#/components/responses/ValidationError400"
         "403":
@@ -205,7 +106,6 @@ paths:
 
   /api/incidents/{id}:
     get:
-      tags: [Incidents]
       summary: Get incident by id
       parameters:
         - $ref: "#/components/parameters/XOpsUserId"
@@ -215,14 +115,12 @@ paths:
           description: Incident
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Incident"
+              schema: { $ref: "#/components/schemas/Incident" }
         "403":
           $ref: "#/components/responses/ValidationError403"
         "404":
           $ref: "#/components/responses/NotFound"
     patch:
-      tags: [Incidents]
       summary: Patch incident (responder/admin)
       parameters:
         - $ref: "#/components/parameters/XOpsUserId"
@@ -231,30 +129,15 @@ paths:
         required: true
         content:
           application/json:
-            schema:
-              $ref: "#/components/schemas/IncidentPatch"
+            schema: { $ref: "#/components/schemas/IncidentPatch" }
       responses:
         "200":
           description: Updated incident
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Incident"
+              schema: { $ref: "#/components/schemas/Incident" }
         "400":
           $ref: "#/components/responses/ValidationError400"
-        "403":
-          $ref: "#/components/responses/ValidationError403"
-        "404":
-          $ref: "#/components/responses/NotFound"
-    delete:
-      tags: [Incidents]
-      summary: Delete incident (responder/admin)
-      parameters:
-        - $ref: "#/components/parameters/XOpsUserId"
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "204":
-          description: Deleted
         "403":
           $ref: "#/components/responses/ValidationError403"
         "404":
@@ -262,7 +145,6 @@ paths:
 
   /api/incidents/{id}/reopen:
     post:
-      tags: [Incidents]
       summary: Reopen incident (resolved → investigating) (responder/admin)
       parameters:
         - $ref: "#/components/parameters/XOpsUserId"
@@ -272,90 +154,23 @@ paths:
           description: Reopened incident
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Incident"
+              schema: { $ref: "#/components/schemas/Incident" }
         "400":
           $ref: "#/components/responses/ValidationError400"
         "403":
           $ref: "#/components/responses/ValidationError403"
         "404":
           $ref: "#/components/responses/NotFound"
-
-  /api/incidents/{id}/comments:
-    get:
-      tags: [Comments]
-      summary: List comments for incident
-      parameters:
-        - $ref: "#/components/parameters/XOpsUserId"
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200":
-          description: Comment list
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Comment"
-        "403":
-          $ref: "#/components/responses/ValidationError403"
-        "404":
-          $ref: "#/components/responses/NotFound"
-    post:
-      tags: [Comments]
-      summary: Create comment for incident (responder/admin)
-      parameters:
-        - $ref: "#/components/parameters/XOpsUserId"
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CommentCreate"
-      responses:
-        "201":
-          description: Created comment
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Comment"
-        "400":
-          $ref: "#/components/responses/ValidationError400"
-        "403":
-          $ref: "#/components/responses/ValidationError403"
-        "404":
-          $ref: "#/components/responses/NotFound"
-
-  /api/users:
-    get:
-      tags: [Users]
-      summary: List users
-      parameters:
-        - $ref: "#/components/parameters/XOpsUserId"
-      responses:
-        "200":
-          description: User list
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/User"
-        "403":
-          $ref: "#/components/responses/ValidationError403"
 
   /api/activity:
     get:
-      tags: [Activity]
       summary: List activity (newest-first)
       parameters:
         - $ref: "#/components/parameters/XOpsUserId"
         - name: forceError
           in: query
           required: false
-          schema:
-            type: string
+          schema: { type: string }
           description: When "true", returns HTTP 500 deterministically.
       responses:
         "200":
@@ -364,16 +179,14 @@ paths:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: "#/components/schemas/Activity"
+                items: { $ref: "#/components/schemas/Activity" }
         "403":
           $ref: "#/components/responses/ValidationError403"
         "500":
           description: Deterministic failure mode for testing
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/InternalError"
+              schema: { $ref: "#/components/schemas/InternalError" }
 
 components:
   parameters:
@@ -381,207 +194,40 @@ components:
       name: x-ops-user-id
       in: header
       required: true
-      schema:
-        type: string
-      description: |
-        Required user context. Must match an existing user id from `/api/users`.
+      schema: { type: string }
     Id:
       name: id
       in: path
       required: true
-      schema:
-        type: string
+      schema: { type: string }
   responses:
     NotFound:
       description: Not found
       content:
         application/json:
-          schema:
-            $ref: "#/components/schemas/NotFound"
+          schema: { $ref: "#/components/schemas/NotFound" }
     ValidationError400:
       description: Validation error
       content:
         application/json:
-          schema:
-            $ref: "#/components/schemas/ValidationError"
+          schema: { $ref: "#/components/schemas/ValidationError" }
     ValidationError403:
-      description: Forbidden / missing user context (VALIDATION_ERROR envelope)
+      description: Forbidden / missing user context
       content:
         application/json:
-          schema:
-            $ref: "#/components/schemas/ValidationError"
+          schema: { $ref: "#/components/schemas/ValidationError" }
   schemas:
-    ServiceStatus:
-      type: string
-      enum: ["active", "degraded"]
-    ServiceTier:
-      type: integer
-      enum: [0, 1, 2, 3]
     UserRole:
       type: string
-      enum: ["admin", "responder", "viewer"]
+      enum: [admin, responder, viewer]
+
     IncidentStatus:
       type: string
-      enum: ["triggered", "acknowledged", "investigating", "mitigated", "resolved"]
+      enum: [triggered, acknowledged, investigating, mitigated, resolved]
+
     IncidentSeverity:
       type: string
-      enum: ["S1", "S2", "S3", "S4"]
-    IncidentSort:
-      type: string
-      enum: ["createdAt_desc", "createdAt_asc", "severity_asc", "severity_desc"]
-
-    Service:
-      type: object
-      additionalProperties: false
-      properties:
-        id: { type: string }
-        name: { type: string }
-        tier: { $ref: "#/components/schemas/ServiceTier" }
-        ownerTeam: { type: string }
-        status: { $ref: "#/components/schemas/ServiceStatus" }
-        createdAt:
-          type: string
-          format: date-time
-      required: [id, name, tier, ownerTeam, status, createdAt]
-
-    ServiceCreate:
-      type: object
-      additionalProperties: false
-      properties:
-        name: { type: string, minLength: 2 }
-        tier: { $ref: "#/components/schemas/ServiceTier" }
-        ownerTeam: { type: string, minLength: 2 }
-        status: { $ref: "#/components/schemas/ServiceStatus" }
-      required: [name, tier, ownerTeam, status]
-
-    ServicePatch:
-      type: object
-      additionalProperties: false
-      properties:
-        name: { type: string, minLength: 2 }
-        tier: { $ref: "#/components/schemas/ServiceTier" }
-        ownerTeam: { type: string, minLength: 2 }
-        status: { $ref: "#/components/schemas/ServiceStatus" }
-
-    Incident:
-      type: object
-      additionalProperties: false
-      properties:
-        id: { type: string }
-        serviceId: { type: string }
-        title: { type: string }
-        description: { type: string }
-        status: { $ref: "#/components/schemas/IncidentStatus" }
-        severity: { $ref: "#/components/schemas/IncidentSeverity" }
-        commanderId:
-          oneOf:
-            - type: string
-            - type: "null"
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        acknowledgedAt:
-          oneOf:
-            - type: string
-              format: date-time
-            - type: "null"
-        resolvedAt:
-          oneOf:
-            - type: string
-              format: date-time
-            - type: "null"
-        tags:
-          type: array
-          items: { type: string }
-      required:
-        [
-          id,
-          serviceId,
-          title,
-          description,
-          status,
-          severity,
-          commanderId,
-          createdAt,
-          updatedAt,
-          acknowledgedAt,
-          resolvedAt,
-          tags,
-        ]
-
-    IncidentCreate:
-      type: object
-      additionalProperties: false
-      properties:
-        serviceId: { type: string, minLength: 1 }
-        title: { type: string, minLength: 4 }
-        description: { type: string, minLength: 1 }
-        severity: { $ref: "#/components/schemas/IncidentSeverity" }
-        tags:
-          type: array
-          items: { type: string }
-      required: [serviceId, title, description, severity]
-
-    IncidentPatch:
-      type: object
-      additionalProperties: false
-      properties:
-        title: { type: string, minLength: 4 }
-        description: { type: string, minLength: 1 }
-        severity: { $ref: "#/components/schemas/IncidentSeverity" }
-        tags:
-          type: array
-          items: { type: string }
-        commanderId:
-          oneOf:
-            - type: string
-            - type: "null"
-        status: { $ref: "#/components/schemas/IncidentStatus" }
-
-    Comment:
-      type: object
-      additionalProperties: false
-      properties:
-        id: { type: string }
-        incidentId: { type: string }
-        authorId: { type: string }
-        body: { type: string }
-        createdAt:
-          type: string
-          format: date-time
-      required: [id, incidentId, authorId, body, createdAt]
-
-    CommentCreate:
-      type: object
-      additionalProperties: false
-      properties:
-        body: { type: string, minLength: 1 }
-      required: [body]
-
-    ActivityType:
-      type: string
-      enum: ["create", "update", "delete", "reopen", "comment"]
-
-    ActivityEntityType:
-      type: string
-      enum: ["service", "incident"]
-
-    Activity:
-      type: object
-      additionalProperties: false
-      properties:
-        id: { type: string }
-        type: { $ref: "#/components/schemas/ActivityType" }
-        entityType: { $ref: "#/components/schemas/ActivityEntityType" }
-        entityId: { type: string }
-        message: { type: string }
-        createdAt:
-          type: string
-          format: date-time
-      required: [id, type, entityType, entityId, message, createdAt]
+      enum: [S1, S2, S3, S4]
 
     User:
       type: object
@@ -595,6 +241,70 @@ components:
         onCall: { type: boolean }
       required: [id, name, email, role, team, onCall]
 
+    Incident:
+      type: object
+      additionalProperties: false
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        status: { $ref: "#/components/schemas/IncidentStatus" }
+        severity: { $ref: "#/components/schemas/IncidentSeverity" }
+        commanderId:
+          oneOf: [{ type: string }, { type: "null" }]
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        acknowledgedAt:
+          oneOf: [{ type: string, format: date-time }, { type: "null" }]
+        resolvedAt:
+          oneOf: [{ type: string, format: date-time }, { type: "null" }]
+        tags:
+          type: array
+          items: { type: string }
+      required: [id, title, description, status, severity, commanderId, createdAt, updatedAt, acknowledgedAt, resolvedAt, tags]
+
+    IncidentCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        title: { type: string, minLength: 4 }
+        description: { type: string, minLength: 1 }
+        severity: { $ref: "#/components/schemas/IncidentSeverity" }
+        tags:
+          type: array
+          items: { type: string }
+      required: [title, description, severity]
+
+    IncidentPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        title: { type: string, minLength: 4 }
+        description: { type: string, minLength: 1 }
+        severity: { $ref: "#/components/schemas/IncidentSeverity" }
+        tags:
+          type: array
+          items: { type: string }
+        commanderId:
+          oneOf: [{ type: string }, { type: "null" }]
+        status: { $ref: "#/components/schemas/IncidentStatus" }
+
+    Activity:
+      type: object
+      additionalProperties: false
+      properties:
+        id: { type: string }
+        type:
+          type: string
+          enum: [create, update, delete, reopen]
+        entityType:
+          type: string
+          enum: [incident]
+        entityId: { type: string }
+        message: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, type, entityType, entityId, message, createdAt]
+
     ValidationError:
       type: object
       additionalProperties: false
@@ -605,13 +315,11 @@ components:
           properties:
             code:
               type: string
-              enum: ["VALIDATION_ERROR"]
-            message:
-              type: string
+              enum: [VALIDATION_ERROR]
+            message: { type: string }
             fields:
               type: object
-              additionalProperties:
-                type: string
+              additionalProperties: { type: string }
           required: [code, message, fields]
       required: [error]
 
@@ -634,25 +342,7 @@ components:
           properties:
             code:
               type: string
-              enum: ["INTERNAL_ERROR"]
-            message:
-              type: string
+              enum: [INTERNAL_ERROR]
+            message: { type: string }
           required: [code, message]
       required: [error]
-
-    # Client-derived shape (not returned by server; used by UI for SLA badges/KPIs)
-    SlaResult:
-      type: object
-      additionalProperties: false
-      properties:
-        targetMinutes:
-          type: number
-        remainingMinutes:
-          type: number
-        breached:
-          type: boolean
-        remainingLabel:
-          type: string
-      required: [targetMinutes, remainingMinutes, breached, remainingLabel]
-
-

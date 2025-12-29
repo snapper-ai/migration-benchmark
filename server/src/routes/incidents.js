@@ -24,7 +24,6 @@ function cmpSeverity(a, b) {
 incidentsRouter.get("/", (req, res) => {
   const db = req.app.locals.db;
   const {
-    serviceId = "",
     status = "",
     severity = "",
     q = "",
@@ -33,7 +32,6 @@ incidentsRouter.get("/", (req, res) => {
   } = req.query;
 
   const query = {
-    serviceId: String(serviceId),
     status: String(status),
     severity: String(severity),
     q: String(q),
@@ -44,7 +42,6 @@ incidentsRouter.get("/", (req, res) => {
   const qLower = query.q.trim().toLowerCase();
   let items = db.state.incidents;
 
-  if (query.serviceId) items = items.filter((i) => i.serviceId === query.serviceId);
   if (query.status) items = items.filter((i) => i.status === query.status);
   if (query.severity) items = items.filter((i) => i.severity === query.severity);
   if (query.breached === "true") items = items.filter((i) => isBreached(i));
@@ -69,11 +66,9 @@ incidentsRouter.get("/", (req, res) => {
 
 incidentsRouter.post("/", requireRole(["responder", "admin"]), (req, res) => {
   const db = req.app.locals.db;
-  const { serviceId, title, description, severity, tags } = req.body || {};
+  const { title, description, severity, tags } = req.body || {};
 
   const fields = {};
-  if (typeof serviceId !== "string" || !serviceId) fields.serviceId = "serviceId is required";
-  if (!db.state.services.some((s) => s.id === serviceId)) fields.serviceId = "Unknown serviceId";
   if (typeof title !== "string" || title.trim().length < 4) fields.title = "Title must be at least 4 characters";
   if (typeof description !== "string" || description.trim().length < 1) fields.description = "Description is required";
   if (!["S1", "S2", "S3", "S4"].includes(severity)) fields.severity = "Severity must be S1..S4";
@@ -85,7 +80,6 @@ incidentsRouter.post("/", requireRole(["responder", "admin"]), (req, res) => {
   const now = new Date().toISOString();
   const incident = {
     id: db.ids.create("incident"),
-    serviceId,
     title: title.trim(),
     description: description.trim(),
     status: "triggered",

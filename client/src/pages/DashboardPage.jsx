@@ -8,10 +8,9 @@ import { formatDateTime } from "../utils/dates.js";
 
 export default function DashboardPage() {
   const actions = useAppActions();
-  const { services, incidents, activity } = useAppState();
+  const { incidents, activity } = useAppState();
 
   React.useEffect(() => {
-    actions.loadServices();
     actions.loadIncidents({ ...incidents.query, sort: "createdAt_desc" });
     actions.loadActivity();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -40,13 +39,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {services.status === "loading" || incidents.status === "loading" ? (
-        <LoadingState />
-      ) : null}
-
-      {services.error ? (
-        <ErrorCallout title="Services failed" message={services.error} onRetry={() => actions.loadServices()} />
-      ) : null}
+      {incidents.status === "loading" ? <LoadingState /> : null}
       {incidents.error ? (
         <ErrorCallout
           title="Incidents failed"
@@ -58,7 +51,6 @@ export default function DashboardPage() {
       <div className="rounded border border-slate-800 bg-slate-950 p-4">
         <div className="text-sm font-semibold text-slate-200">Seed sanity</div>
         <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-300 md:grid-cols-3">
-          <div>Services: {services.items.length}</div>
           <div>Incidents: {incidents.items.length}</div>
           <div>Activity: {activity.items.length}</div>
         </div>

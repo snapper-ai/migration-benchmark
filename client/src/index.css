@@ -1,12 +1,40 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* slightly opinionated defaults to create migration-stressful styling edges */
 html,
 body,
 #root {
   height: 100%;
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+body {
+  background: #0b1220;
+  color: #e5e7eb;
+}
+
+a {
+  color: #93c5fd;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.card {
+  border: 1px solid #243043;
+  background: #0e1628;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 

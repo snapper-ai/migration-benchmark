@@ -21,18 +21,16 @@ It is intentionally structured to be **migration-stressful** while remaining rea
     - Client dev server listens on `process.env.VITE_PORT` (fallback `5173`)
 
 - **Seed data counts (deterministic, stable IDs)**
-  - Services: **3** (Lite Template v2)
-  - Incidents: **10** (Lite Template v2)
-  - Users: **3** (Lite Template v2)
-  - Activity entries: **5** (Lite Template v2)
-  - Comments: **5** (Lite Template v2)
+  - Users: **3** (min-v0)
+  - Incidents: **10** (min-v0)
+  - Activity entries: **5** (min-v0)
 
 - **Root scripts (run from repo root)**
   - **`npm run dev`**: starts server (3001) + client (5173) concurrently and prints both URLs
   - **`npm run build`**: frontend-only production build via Vite (hard-fails on build errors)
-  - **`npm run test`**: runs server tests + client tests in one command (Vitest)
-  - **`npm run lint`**: runs ESLint for server + client in one command
-  - **`npm run verify`**: `lint -> test -> build` (non-interactive, fails fast)
+  - **`npm run test`**: runs server tests + client tests in one command (min-v0 uses Node test runner on server; client tests are skipped)
+  - **`npm run lint`**: skipped (min-v0) to reduce migration-time dependency conflicts
+  - **`npm run verify`**: `test -> build`
 
 - **Canonical benchmark files (must match benchmark drafts exactly)**
   - `MIGRATION_TASK.md`
@@ -58,6 +56,13 @@ Client env example: `client/.env.example` (Vite reads via `import.meta.env`).
 See `contracts/`:
 - `contracts/openapi.yaml`: OpenAPI 3 spec for `/api/*` routes (request/response shapes and enums)
 - `contracts/examples.md`: JSON examples for key endpoints
+
+## Minimal migration benchmark (min-v0)
+
+This branch is **min-v0**: a stripped-down migration benchmark template focused on migration signal while minimizing toolchain friction.
+
+- Task doc: `MIN_V0_TASK.md`
+- Verification checklist: `MIN_V0_CORE_FLOWS.md`
 
 ## Lite Template v1
 

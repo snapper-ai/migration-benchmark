@@ -6,13 +6,11 @@ const AppStateContext = React.createContext(null);
 const AppActionsContext = React.createContext(null);
 
 const initialState = {
-  services: { items: [], status: "idle", error: null },
   incidents: {
     items: [],
     status: "idle",
     error: null,
     query: {
-      serviceId: "",
       status: "",
       severity: "",
       q: "",
@@ -22,18 +20,10 @@ const initialState = {
   },
   users: { items: [], status: "idle", error: null },
   activity: { items: [], status: "idle", error: null },
-  comments: { byIncidentId: {}, status: "idle", error: null },
 };
 
 function reducer(state, action) {
   switch (action.type) {
-    case "services/loading":
-      return { ...state, services: { ...state.services, status: "loading", error: null } };
-    case "services/loaded":
-      return { ...state, services: { items: action.payload, status: "succeeded", error: null } };
-    case "services/error":
-      return { ...state, services: { ...state.services, status: "failed", error: action.error } };
-
     case "incidents/setQuery":
       return { ...state, incidents: { ...state.incidents, query: { ...state.incidents.query, ...action.payload } } };
     case "incidents/loading":
@@ -57,21 +47,6 @@ function reducer(state, action) {
     case "activity/error":
       return { ...state, activity: { ...state.activity, status: "failed", error: action.error } };
 
-    case "comments/loading":
-      return { ...state, comments: { ...state.comments, status: "loading", error: null } };
-    case "comments/loadedForIncident":
-      return {
-        ...state,
-        comments: {
-          ...state.comments,
-          status: "succeeded",
-          error: null,
-          byIncidentId: { ...state.comments.byIncidentId, [action.incidentId]: action.payload },
-        },
-      };
-    case "comments/error":
-      return { ...state, comments: { ...state.comments, status: "failed", error: action.error } };
-
     default:
       return state;
   }
@@ -81,33 +56,6 @@ export function AppProvider({ children }) {
   const [state, dispatch] = React.useReducer(reducer, initialState);
 
   const actions = React.useMemo(() => {
-    async function loadServices() {
-      dispatch({ type: "services/loading" });
-      try {
-        const data = await apiFetch("/services");
-        dispatch({ type: "services/loaded", payload: data });
-      } catch (e) {
-        dispatch({ type: "services/error", error: e.message || "Failed to load services" });
-      }
-    }
-
-    async function createService(payload) {
-      const created = await apiFetch("/services", { method: "POST", body: payload });
-      await loadServices();
-      return created;
-    }
-
-    async function patchService(id, patch) {
-      const updated = await apiFetch(`/services/${id}`, { method: "PATCH", body: patch });
-      await loadServices();
-      return updated;
-    }
-
-    async function deleteService(id) {
-      await apiFetch(`/services/${id}`, { method: "DELETE" });
-      await loadServices();
-    }
-
     function setIncidentQuery(patch) {
       dispatch({ type: "incidents/setQuery", payload: patch });
     }
@@ -161,30 +109,7 @@ export function AppProvider({ children }) {
       }
     }
 
-    async function loadComments(incidentId) {
-      dispatch({ type: "comments/loading" });
-      try {
-        const data = await apiFetch(`/incidents/${incidentId}/comments`);
-        dispatch({ type: "comments/loadedForIncident", incidentId, payload: data });
-      } catch (e) {
-        dispatch({ type: "comments/error", error: e.message || "Failed to load comments" });
-      }
-    }
-
-    async function addComment(incidentId, body) {
-      const created = await apiFetch(`/incidents/${incidentId}/comments`, {
-        method: "POST",
-        body: { body },
-      });
-      await loadComments(incidentId);
-      return created;
-    }
-
     return {
-      loadServices,
-      createService,
-      patchService,
-      deleteService,
       setIncidentQuery,
       loadIncidents,
       createIncident,
@@ -192,8 +117,6 @@ export function AppProvider({ children }) {
       reopenIncident,
       loadUsers,
       loadActivity,
-      loadComments,
-      addComment,
     };
     // We intentionally exclude `state` to keep actions stable; actions call loadIncidents with current state where needed.
     // eslint-disable-next-line react-hooks/exhaustive-deps

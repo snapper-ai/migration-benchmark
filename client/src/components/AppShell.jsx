@@ -29,9 +29,7 @@ export function AppShell({ children }) {
           </div>
           <nav className="flex items-center gap-2">
             <NavItem to="/">Dashboard</NavItem>
-            <NavItem to="/services">Services</NavItem>
             <NavItem to="/incidents">Incidents</NavItem>
-            <NavItem to="/responders">Responders</NavItem>
             <NavItem to="/settings">Settings</NavItem>
           </nav>
         </div>

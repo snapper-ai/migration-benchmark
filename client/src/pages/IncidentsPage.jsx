@@ -11,13 +11,12 @@ import { canManageIncidents } from "../utils/roles.js";
 
 export default function IncidentsPage() {
   const actions = useAppActions();
-  const { incidents, services } = useAppState();
+  const { incidents } = useAppState();
   const currentUser = useCurrentUser();
   const canEdit = canManageIncidents(currentUser?.role);
 
   const [createOpen, setCreateOpen] = React.useState(false);
   const [form, setForm] = React.useState({
-    serviceId: "",
     title: "",
     description: "",
     severity: "S2",
@@ -26,7 +25,6 @@ export default function IncidentsPage() {
   const [formError, setFormError] = React.useState(null);
 
   React.useEffect(() => {
-    actions.loadServices();
     actions.loadUsers();
   }, [actions]);
 
@@ -35,7 +33,6 @@ export default function IncidentsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     actions,
-    incidents.query.serviceId,
     incidents.query.status,
     incidents.query.severity,
     incidents.query.q,
@@ -45,7 +42,6 @@ export default function IncidentsPage() {
 
   function submitCreate() {
     const fields = {};
-    if (!form.serviceId) fields.serviceId = "Service is required";
     if (!form.title || String(form.title).trim().length < 4) fields.title = "Title must be at least 4 characters";
     if (!form.description || String(form.description).trim().length < 1) fields.description = "Description is required";
     if (!["S1", "S2", "S3", "S4"].includes(form.severity)) fields.severity = "Severity must be S1..S4";
@@ -63,7 +59,6 @@ export default function IncidentsPage() {
       : [];
     actions
       .createIncident({
-        serviceId: form.serviceId,
         title: String(form.title).trim(),
         description: String(form.description).trim(),
         severity: form.severity,
@@ -71,7 +66,7 @@ export default function IncidentsPage() {
       })
       .then(() => {
         setCreateOpen(false);
-        setForm({ serviceId: "", title: "", description: "", severity: "S2", tags: "" });
+        setForm({ title: "", description: "", severity: "S2", tags: "" });
       })
       .catch((e) => setFormError(e.message || "Failed to create incident"));
   }
@@ -102,21 +97,6 @@ export default function IncidentsPage() {
             onChange={(e) => actions.setIncidentQuery({ q: e.target.value })}
             placeholder="title / description / tag"
           />
-        </label>
-        <label>
-          <div className="mb-1 text-xs text-slate-400">Service</div>
-          <select
-            className="w-full rounded border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-            value={incidents.query.serviceId}
-            onChange={(e) => actions.setIncidentQuery({ serviceId: e.target.value })}
-          >
-            <option value="">All</option>
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
         </label>
         <label>
           <div className="mb-1 text-xs text-slate-400">Status</div>
@@ -186,7 +166,6 @@ export default function IncidentsPage() {
 
       <div className="space-y-2">
         {incidents.items.map((i) => {
-          const svc = services.find((s) => s.id === i.serviceId);
           const sla = computeSla(i);
           const next = allowedTransitions[i.status] || [];
 
@@ -198,7 +177,7 @@ export default function IncidentsPage() {
               <div className="space-y-1">
                 <div className="text-sm font-semibold text-slate-100">{i.title}</div>
                 <div className="text-xs text-slate-400">
-                  {i.severity} · {i.status} · {svc ? svc.name : i.serviceId}
+                  {i.severity} · {i.status}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -264,21 +243,6 @@ export default function IncidentsPage() {
       >
         {formError ? <div className="mb-2 text-xs text-rose-200">{formError}</div> : null}
         <div className="grid grid-cols-1 gap-3">
-          <label>
-            <div className="mb-1 text-xs text-slate-400">Service</div>
-            <select
-              className="w-full rounded border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-              value={form.serviceId}
-              onChange={(e) => setForm((f) => ({ ...f, serviceId: e.target.value }))}
-            >
-              <option value="">Select…</option>
-              {services.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </label>
           <label>
             <div className="mb-1 text-xs text-slate-400">Title</div>
             <input
