@@ -67,6 +67,10 @@ This repo also has a **Lite Template v1** baseline tag intended to reduce migrat
 
 This branch/tag is **Lite Template v2**. See `LITE_TEMPLATE_V2.md`.
 
+## Lite Template v3
+
+This branch/tag is **Lite Template v3** (router + schema simplifications to reduce common migration failures). See `LITE_TEMPLATE_V3.md`.
+
 ### Running multiple instances (example)
 
 ```bash

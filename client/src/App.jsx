@@ -8,8 +8,7 @@ import ServicesPage from "./pages/ServicesPage.jsx";
 import ServiceDetailPage from "./pages/ServiceDetailPage.jsx";
 import IncidentsPage from "./pages/IncidentsPage.jsx";
 import IncidentDetailPage from "./pages/IncidentDetailPage.jsx";
-import RespondersPage from "./pages/RespondersPage.jsx";
-import SettingsPage from "./pages/SettingsPage.jsx";
+import UtilityPage from "./pages/UtilityPage.jsx";
 
 export default function App() {
   React.useEffect(() => {
@@ -25,8 +24,8 @@ export default function App() {
           <Route path="/services/:id" element={<ServiceDetailPage />} />
           <Route path="/incidents" element={<IncidentsPage />} />
           <Route path="/incidents/:id" element={<IncidentDetailPage />} />
-          <Route path="/responders" element={<RespondersPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/responders" element={<UtilityPage mode="responders" />} />
+          <Route path="/settings" element={<UtilityPage mode="settings" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>

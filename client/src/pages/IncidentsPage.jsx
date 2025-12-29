@@ -6,7 +6,6 @@ import { Modal } from "../components/Modal.jsx";
 import { Badge } from "../components/Badge.jsx";
 import { computeSla } from "../utils/sla.js";
 import { allowedTransitions } from "../utils/statusTransitions.js";
-import { createIncidentSchema } from "../validation/schemas.js";
 import { useCurrentUser } from "../hooks/useCurrentUser.js";
 import { canManageIncidents } from "../utils/roles.js";
 
@@ -45,25 +44,31 @@ export default function IncidentsPage() {
   ]);
 
   function submitCreate() {
-    const parsed = createIncidentSchema.safeParse({
-      serviceId: form.serviceId,
-      title: form.title,
-      description: form.description,
-      severity: form.severity,
-      tags: form.tags
-        ? form.tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean)
-        : [],
-    });
-    if (!parsed.success) {
-      setFormError(parsed.error.issues[0]?.message || "Invalid input");
+    const fields = {};
+    if (!form.serviceId) fields.serviceId = "Service is required";
+    if (!form.title || String(form.title).trim().length < 4) fields.title = "Title must be at least 4 characters";
+    if (!form.description || String(form.description).trim().length < 1) fields.description = "Description is required";
+    if (!["S1", "S2", "S3", "S4"].includes(form.severity)) fields.severity = "Severity must be S1..S4";
+    if (Object.keys(fields).length) {
+      const first = Object.values(fields)[0];
+      setFormError(String(first));
       return;
     }
     setFormError(null);
+    const tags = form.tags
+      ? form.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [];
     actions
-      .createIncident(parsed.data)
+      .createIncident({
+        serviceId: form.serviceId,
+        title: String(form.title).trim(),
+        description: String(form.description).trim(),
+        severity: form.severity,
+        tags,
+      })
       .then(() => {
         setCreateOpen(false);
         setForm({ serviceId: "", title: "", description: "", severity: "S2", tags: "" });

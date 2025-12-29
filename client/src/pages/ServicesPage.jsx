@@ -5,7 +5,6 @@ import { LoadingState } from "../components/LoadingState.jsx";
 import { ErrorCallout } from "../components/ErrorCallout.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { Badge } from "../components/Badge.jsx";
-import { createServiceSchema } from "../validation/schemas.js";
 import { useCurrentUser } from "../hooks/useCurrentUser.js";
 import { canManageServices } from "../utils/roles.js";
 
@@ -30,17 +29,27 @@ export default function ServicesPage() {
   }, [actions]);
 
   function submitCreate() {
-    const parsed = createServiceSchema.safeParse({
-      ...form,
-      tier: Number(form.tier),
-    });
-    if (!parsed.success) {
-      setFormError(parsed.error.issues[0]?.message || "Invalid input");
+    const tier = Number(form.tier);
+    const fields = {};
+    if (!form.name || String(form.name).trim().length < 2) fields.name = "Name must be at least 2 characters";
+    if (![0, 1, 2, 3].includes(tier)) fields.tier = "Tier must be 0, 1, 2, or 3";
+    if (!form.ownerTeam || String(form.ownerTeam).trim().length < 2)
+      fields.ownerTeam = "Owner team must be at least 2 characters";
+    if (!["active", "degraded"].includes(form.status)) fields.status = "Status must be active or degraded";
+
+    if (Object.keys(fields).length) {
+      const first = Object.values(fields)[0];
+      setFormError(String(first));
       return;
     }
     setFormError(null);
     actions
-      .createService(parsed.data)
+      .createService({
+        name: String(form.name).trim(),
+        tier,
+        ownerTeam: String(form.ownerTeam).trim(),
+        status: form.status,
+      })
       .then(() => {
         setCreateOpen(false);
         setForm({ name: "", tier: 1, ownerTeam: "", status: "active" });
