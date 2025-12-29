@@ -21,7 +21,8 @@ This template is intentionally small to avoid install/toolchain conflicts and re
 
 ### Enums: do not invent values
 
-Use only the enums from `contracts/openapi.yaml` (or copy from `client/src/domain/enums.js`):
+Use only the enums from `contracts/openapi.yaml`.
+The file `client/src/domain/enums.js` is **generated from** `contracts/openapi.yaml` (see `scripts/generate-client-enums-from-openapi.js`) and can be used as a copy/reference point.
 - `IncidentStatus`: `triggered | acknowledged | investigating | mitigated | resolved`
 - `IncidentSeverity`: `S1 | S2 | S3 | S4`
 
