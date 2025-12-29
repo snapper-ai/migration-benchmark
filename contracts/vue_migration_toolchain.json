@@ -1,0 +1,30 @@
+{
+  "node": "20.x (validated on v20.19.5)",
+  "package_manager": "npm",
+  "toolchain": {
+    "vue": "3.5.26",
+    "vite": "7.3.0",
+    "@vitejs/plugin-vue": "6.0.3",
+    "typescript": "5.9.3",
+    "vue-tsc": "3.2.1",
+    "pinia": "3.0.4",
+    "vue-router": "4.6.4"
+  },
+  "notes": "These versions were validated together under Node v20.19.5: `npm install` succeeds, `npx vue-tsc --noEmit` succeeds, and `npm run build` succeeds. Use this pinned set to avoid incompatible vue-tsc/typescript combinations that can cause internal vue-tsc crashes (e.g. Search string not found: \"/supportedTSExtensions = .*(?=;)/\").",
+  "recommended_client_package_json_snippet": {
+    "type": "module",
+    "dependencies": {
+      "vue": "3.5.26",
+      "pinia": "3.0.4",
+      "vue-router": "4.6.4"
+    },
+    "devDependencies": {
+      "vite": "7.3.0",
+      "@vitejs/plugin-vue": "6.0.3",
+      "typescript": "5.9.3",
+      "vue-tsc": "3.2.1"
+    }
+  }
+}
+
+

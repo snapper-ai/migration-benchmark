@@ -56,6 +56,7 @@ Client env example: `client/.env.example` (Vite reads via `import.meta.env`).
 See `contracts/`:
 - `contracts/openapi.yaml`: OpenAPI 3 spec for `/api/*` routes (request/response shapes and enums)
 - `contracts/examples.md`: JSON examples for key endpoints
+- `contracts/vue_migration_toolchain.json`: authoritative, known-compatible Vue migration toolchain versions (use these; do not guess)
 
 ## Minimal migration benchmark (min-v0)
 
